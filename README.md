@@ -1,2 +1,3 @@
-vim-irregular
+Irregular
 =============
+Work in progress.
