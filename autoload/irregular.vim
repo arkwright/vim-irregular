@@ -1,5 +1,9 @@
-function! irregular#VimIrregular()
+let g:irregular_register = 'z'
+
+function! irregular#Irregular()
   let l:bufferName = '[Irregular]'
+
+  let l:currentBuffer = winbufnr(0)
 
   " Toggle closed if already open.
   if bufexists(l:bufferName)
@@ -7,8 +11,11 @@ function! irregular#VimIrregular()
     " characters in the buffer name.
     execute 'bwipeout! \' . l:bufferName . '\'
   else
+    let l:mode = strpart(getreg(g:irregular_register), 0, 1)
+    let l:command = strpart(getreg(g:irregular_register), 1)
+
     " Open new split.
-    execute 'noswapfile leftabove 45vnew ' . l:bufferName
+    execute 'noswapfile leftabove 38vnew ' . l:bufferName
 
     " Make modifiable if not already.
     setlocal modifiable
@@ -18,7 +25,8 @@ function! irregular#VimIrregular()
 
     " Insert text.
     call append(0, [
-\'           REGEX CHEATSHEET          ',
+\'=====================================',
+\'         REGEX CHEATSHEET (\v)       ',
 \'=====================================',
 \'^                       start-of-line',
 \'$                         end-of-line',
@@ -28,7 +36,6 @@ function! irregular#VimIrregular()
 \'\S           non-whitespace character',
 \'\d                              digit',
 \'\D                          non-digit',
-\'\a               alphabetic character',
 \'\a               alphabetic character',
 \'\A           non-alphabetic character',
 \'=====================================',
@@ -52,5 +59,32 @@ function! irregular#VimIrregular()
     setlocal buftype=nofile
     setlocal bufhidden=delete
     setlocal nomodifiable
+
+    " Maximize available space
+    setlocal nonumber
+    setlocal norelativenumber
+    setlocal foldcolumn=0
+
+    " Return to the starting window.
+    execute 'normal! ' . bufwinnr(l:currentBuffer) . "\<C-w>w"
+    ". "\<C-r>" . g:irregular_register
   endif
 endfunction
+" <C-\>e is used to replace the command line with the result of an expression.
+" This is the only way I have found of detecting and saving the current
+" command line mode (e.g. /, ?, or :). The mode is encoded along with the
+" command line contents and stored in a register, because <C-\>e is executed
+" in Vim's 'sandbox' which does not allow setting buffer local variables.
+" Since <C-\>e replaces the current command line contents with the result of
+" the expression, and since setreg() always returns 0, a conditional operator
+" (?:) is used to ensure that the return value of getcmdline() ends up filling
+" the current command line. The effect is that the user's search history
+" (accessible via q/) contains the current command line contents, rather than
+" just the number 0.
+"
+" <C-c> must be used to exit command line mode, rather than <Esc>, because Vim
+" treats <Esc> like <CR> in command line mode mappings.
+"
+" When exiting command line mode using <C-c>, Vim stores the partially-entered
+" commmand in the command history, which is accessible by pressing q/ or q:.
+execute 'cnoremap <C-CR> <C-\>esetreg(''' . g:irregular_register . ''', getcmdtype().getcmdline())?0:getcmdline()<CR><C-c>:call irregular#Irregular()<CR>/'
