@@ -38,6 +38,10 @@ function! irregular#Irregular()
 \'\D                          non-digit',
 \'\a               alphabetic character',
 \'\A           non-alphabetic character',
+\'\t                              <Tab>',
+\'\r                               <CR>',
+\'\b                               <BS>',
+\'\e                              <Esc>',
 \'=====================================',
 \'[]        any character inside the []',
 \'[^]   any character NOT inside the []',
@@ -53,6 +57,16 @@ function! irregular#Irregular()
 \'{n,}                       at least n',
 \'{,m}                           0 to m',
 \'{}                          0 or more',
+\'{-n,m}                n to m (fewest)',
+\'{-n,}             at least n (fewest)',
+\'{-,m}                 0 to m (fewest)',
+\'{-}                0 or more (fewest)',
+
+\{-n,m}	matches n to m of the preceding atom, as few as possible
+\{-n}	matches n of the preceding atom
+\{-n,}	matches at least n of the preceding atom, as few as possible
+\{-,m}	matches 0 to m of the preceding atom, as few as possible
+\{-}	matches 0 or more of the preceding atom, as few as possible
 \])
 
     " Make it immutable.
@@ -70,6 +84,7 @@ function! irregular#Irregular()
     ". "\<C-r>" . g:irregular_register
   endif
 endfunction
+
 " <C-\>e is used to replace the command line with the result of an expression.
 " This is the only way I have found of detecting and saving the current
 " command line mode (e.g. /, ?, or :). The mode is encoded along with the
